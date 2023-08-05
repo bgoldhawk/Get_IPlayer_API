@@ -5,14 +5,14 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Get_IPlayer_API.csproj", "./"]
-RUN dotnet restore "Get_IPlayer_API.csproj"
-COPY . .
+COPY ["src/Get_IPlayer_API/Get_IPlayer_API.csproj", "./Get_IPlayer_API/"]
+RUN dotnet restore "Get_IPlayer_API/Get_IPlayer_API.csproj"
+COPY ./src .
 WORKDIR "/src/"
-RUN dotnet build "Get_IPlayer_API.csproj" -c Release -o /app/build
+RUN dotnet build "Get_IPlayer_API/Get_IPlayer_API.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Get_IPlayer_API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Get_IPlayer_API/Get_IPlayer_API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR ~/

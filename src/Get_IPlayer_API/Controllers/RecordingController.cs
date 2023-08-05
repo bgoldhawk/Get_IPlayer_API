@@ -7,14 +7,14 @@ namespace Get_IPlayer_API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class IPlayerController : Controller
+public class RecordingController : Controller
 {
-    private readonly ILogger<IPlayerController> _logger;
+    private readonly ILogger<RecordingController> _logger;
     private readonly IConfiguration _configuration;
     private readonly string _appName;
     private readonly string _saveDir;
 
-    public IPlayerController(ILogger<IPlayerController> logger, IConfiguration configuration)
+    public RecordingController(ILogger<RecordingController> logger, IConfiguration configuration)
     {
         _logger = logger;
         _configuration = configuration;
@@ -26,7 +26,7 @@ public class IPlayerController : Controller
     // GET
     [HttpGet("{url}")]
 
-    public async Task<IActionResult> Index(string url)
+    public async Task<IActionResult> Index(string url, bool subtitles, string quality = "default")
     {
         var episode = url.Substring(37, 8);
         
