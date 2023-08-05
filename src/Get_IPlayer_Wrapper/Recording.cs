@@ -20,7 +20,7 @@ public class Recording : IRecording
         _configuration = configuration;
         
         _appName = configuration.GetValue<string>("AppName");
-        _workingDir = configuration.GetValue<string>("WorkingDir");
+        _workingDir =  configuration.GetValue<string>("WorkingDir");
         _proxy = configuration.GetValue<string>("Proxy");
     }
     
@@ -30,19 +30,25 @@ public class Recording : IRecording
         
         var stdOutBuffer = new StringBuilder();
 
-        var iplayerCommand = Cli.Wrap($"{_appName} {url}");
-
-        if (quality is not null)
-            iplayerCommand = iplayerCommand.WithArguments($"--quality=\"{quality}\"");
+        var iplayerCommand = Cli.Wrap(_appName)
+            .WithArguments(args =>
+            {
+                args.Add(url);
+                
+                if (quality is not null)
+                    args.Add($"--quality=\"{quality}\"");
         
-        if(url.ToLower().Contains("episodes"))
-            iplayerCommand = iplayerCommand.WithArguments($"--pid-recursive");
+                if(url.ToLower().Contains("episodes"))
+                    args.Add($"--pid-recursive");
 
-        if (subtitles)
-            iplayerCommand = iplayerCommand.WithArguments("--subtitles");
+                if (subtitles)
+                    args.Add("--subtitles");
 
-        if (_proxy is not null)
-            iplayerCommand = iplayerCommand.WithArguments($"--proxy {_proxy}");
+                if (_proxy is not null)
+                    args.Add($"--proxy {_proxy}");
+            });
+
+        
         
         _logger.LogInformation("IPlayer command: {CommandAsString}",iplayerCommand.ToString());
         

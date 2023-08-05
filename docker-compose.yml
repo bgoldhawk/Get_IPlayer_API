@@ -2,11 +2,10 @@ version: '3'
 
 services:
   iplayerapi:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: bgoldhawk/iplayer_api:latest
+    user: root
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
     ports:
-      - "8080:5000"
+      - "8080:80"
