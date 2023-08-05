@@ -1,11 +1,10 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 5000
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["src/Get_IPlayer_API/Get_IPlayer_API.csproj", "./Get_IPlayer_API/"]
+COPY ["src/", "./"]
 RUN dotnet restore "Get_IPlayer_API/Get_IPlayer_API.csproj"
 COPY ./src .
 WORKDIR "/src/"
