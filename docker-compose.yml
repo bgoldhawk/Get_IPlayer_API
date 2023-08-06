@@ -7,5 +7,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - Proxy=http://100.108.160.136:3128
     ports:
       - "8080:80"

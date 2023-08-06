@@ -1,6 +1,8 @@
 using System.Text;
 using System.Web;
 using CliWrap;
+using CliWrap.Buffered;
+using CliWrap.EventStream;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -36,7 +38,11 @@ public class Recording : IRecording
                 args.Add(url);
                 
                 if (quality is not null)
-                    args.Add($"--quality=\"{quality}\"");
+                {
+                    args.Add("--quality")
+                    .Add(quality);
+                }
+                    
         
                 if(url.ToLower().Contains("episodes"))
                     args.Add($"--pid-recursive");
@@ -45,7 +51,11 @@ public class Recording : IRecording
                     args.Add("--subtitles");
 
                 if (_proxy is not null)
-                    args.Add($"--proxy {_proxy}");
+                {
+                    args.Add($"--proxy")
+                    .Add(_proxy);
+                }
+                    
             });
 
         
@@ -53,17 +63,33 @@ public class Recording : IRecording
         _logger.LogInformation("IPlayer command: {CommandAsString}",iplayerCommand.ToString());
         
         
-        var result = await iplayerCommand
+        var result = iplayerCommand
             .WithValidation(CommandResultValidation.None)
-            .WithWorkingDirectory(_workingDir)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .ExecuteAsync();
+            .WithWorkingDirectory(_workingDir);
 
-        Console.WriteLine(result.ToString());
-            
-        //https://www.bbc.co.uk/iplayer/episodes/p0fy65w8/reframed-marilyn-monroe
-        //https://www.bbc.co.uk/iplayer/episode/p0fy6732/reframed-marilyn-monroe-series-1-episode-1
-        return stdOutBuffer.ToString();
+        var processId = string.Empty;
+
+        await foreach(var cmdEvent in iplayerCommand.ListenAsync())
+        {
+            switch (cmdEvent)
+            {
+                case StartedCommandEvent started:
+                    processId = started.ProcessId.ToString();
+                    _logger.LogInformation($"Process started; ID: {started.ProcessId}");
+                    break;
+                case StandardOutputCommandEvent stdOut:
+                    _logger.LogDebug($"Out> {stdOut.Text}");
+                    break;
+                case StandardErrorCommandEvent stdErr:
+                    _logger.LogError($"Err> {stdErr.Text}");
+                    break;
+                case ExitedCommandEvent exited:
+                    _logger.LogInformation($"Process exited; Code: {exited.ExitCode}");
+                    break;
+            }
+        }
+
+        return processId;
     }
     
     
